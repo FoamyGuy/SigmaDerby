@@ -2,8 +2,6 @@
 import random
 import time
 
-import openpyxl
-
 
 class Horse(object):
     number = -1             # jersey number
@@ -37,7 +35,7 @@ class Track(object):
             for i, horse in enumerate(self.horses):    # loop through array that holds horses
                 horse.step()						   # each horse takes a step in turn
                 state_str += "%s, " % horse.position   # saves curState of horses on track
-                if horse.position > 10000:             # determine winner
+                if horse.position > 1000:             # determine winner
                     winning_horses[self.horses[i].number] = self.horses[i]
             #print state_str
             if len(winning_horses) >= 2:               # if at least 2 horses passed finish
@@ -90,9 +88,9 @@ class Track(object):
 
 
 # A round of play
-class Round(object):
+class GameSimulator(object):
     @staticmethod
-    def generate_odds():
+    def generate_payouts():
         all_outcomes = ["[1,2]", "[1,3]", "[1,4]", "[1,5]", "[2,3]",
                         "[2,4]", "[2,5]", "[3,4]", "[3,5]", "[4,5]"]
         odds_choices = []
@@ -117,40 +115,70 @@ class Round(object):
         return odds_matrix
 
     @staticmethod
-    def play():
+    def play(weighted_powers):
+
+
         t = Track()
         t.reset()
         for h in range(1,6):
             new_horse = Horse()
-            new_horse.power = 2 + (h * .01)
+            new_horse.power = weighted_powers[h-1]
             new_horse.number = h
             t.add_horse(new_horse)
 
         return t.run_game()
 
+
+    @staticmethod
+    def get_weighted_powers(payouts):
+        values = [0.0, 0.0, 0.0, 0.0, 0.0]
+        for pair in payouts.keys():
+
+            if "1" in pair:
+                values[0] += payouts[pair]
+            if "2" in pair:
+                values[1] += payouts[pair]
+            if "3" in pair:
+                values[2] += payouts[pair]
+            if "4" in pair:
+                values[3] += payouts[pair]
+            if "5" in pair:
+                values[4] += payouts[pair]
+
+
+        max_val = max(values)
+
+        for i, cur_val in enumerate(values):
+            values[i] = (max_val + 10 - cur_val) / 500
+
+        return values
+
+
 if __name__ == "__main__":
-
-    """
-    for i in range(1, 100):
-        r = Round()
-        r.generate_odds()
-        """
-
-
     tally = {}
 
-    for game in range(1, 100):
+    winnings_paid = []
 
-        payout = Round.generate_odds()
+    start_time = time.time()
+
+    for game in range(1, 10000):
+
+        payouts = GameSimulator.generate_payouts()
+        weighted_powers = GameSimulator.get_weighted_powers(payouts)
         #print(payout)
 
-        winners = Round.play()
-        print("Winners %s. Bet pays: %s" % (winners.keys(), payout[str(winners.keys()).replace(' ', '')]))
+        winners = GameSimulator.play(weighted_powers)
+
+        winnings_paid.append(payouts[str(winners.keys()).replace(' ', '')])
+        #print("Winners %s. Bet pays: %s" % (winners.keys(), payouts[str(winners.keys()).replace(' ', '')]))
         try:
             tally[str(winners.keys())] = tally[str(winners.keys())] + 1
         except KeyError:
             tally[str(winners.keys())] = 1
 
-
     for pair in tally.keys():
         print ("%s: %s" % (pair, tally[pair]))
+
+    print ("Highest payout: %s" % max(winnings_paid))
+
+    print ("Time = %s" % (time.time() - start_time))
