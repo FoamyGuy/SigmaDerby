@@ -1,7 +1,7 @@
-
 import random
 import time
-
+from median import med
+from players import BigBob, CarefulCarl, AlloutAdam, MiddleMelanie
 
 class Horse(object):
     number = -1             # jersey number
@@ -131,7 +131,8 @@ class GameSimulator(object):
 
     @staticmethod
     def get_weighted_powers(payouts):
-        values = [0.0, 0.0, 0.0, 0.0, 0.0]
+        values = [0.2, 0.2, 0.2, 0.2, 0.2]
+
         for pair in payouts.keys():
 
             if "1" in pair:
@@ -148,10 +149,23 @@ class GameSimulator(object):
 
         max_val = max(values)
 
+        min_val = min(values)
+
+        med_value = med(values)
+
         for i, cur_val in enumerate(values):
-            values[i] = (max_val + 10 - cur_val) / 500
+            #values[i] = (max_val + 10 - cur_val) / 500
+            values[i] = 1.1 - (cur_val / max_val)
+
+
+        print (values)
+
+
 
         return values
+
+
+
 
 
 if __name__ == "__main__":
@@ -161,13 +175,39 @@ if __name__ == "__main__":
 
     start_time = time.time()
 
-    for game in range(1, 10000):
+    bob = BigBob()
+    bob.credits = 1000
+
+    carl = CarefulCarl()
+    carl.credits = 1000
+
+    adam = AlloutAdam()
+    adam.credits = 1000
+
+    melanie = MiddleMelanie()
+    melanie.credits = 1000
+
+    carl_wins = 0
+
+    for game in range(1, 1000):
 
         payouts = GameSimulator.generate_payouts()
         weighted_powers = GameSimulator.get_weighted_powers(payouts)
-        #print(payout)
+
+        bob.place_bets(payouts)
+        carl.place_bets(payouts)
+        adam.place_bets(payouts)
+        melanie.place_bets(payouts)
 
         winners = GameSimulator.play(weighted_powers)
+
+        if bob.check_win(winners): print(bob.bets)
+        if carl.check_win(winners): carl_wins += 1
+        adam.check_win(winners)
+        melanie.check_win(winners)
+
+        #print(bob.credits)
+
 
         winnings_paid.append(payouts[str(winners.keys()).replace(' ', '')])
         #print("Winners %s. Bet pays: %s" % (winners.keys(), payouts[str(winners.keys()).replace(' ', '')]))
@@ -180,5 +220,10 @@ if __name__ == "__main__":
         print ("%s: %s" % (pair, tally[pair]))
 
     print ("Highest payout: %s" % max(winnings_paid))
+
+    print ("Bobs ending credits: %s" % bob.credits)
+    print ("Carls ending credits: %s" % carl.credits)
+    print ("Adam ending credits: %s" % adam.credits)
+    print ("Melanie ending credits: %s" % melanie.credits)
 
     print ("Time = %s" % (time.time() - start_time))
