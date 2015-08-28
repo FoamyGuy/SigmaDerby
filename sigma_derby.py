@@ -100,12 +100,12 @@ class GameSimulator(object):
         for i in range(1, 800): odds_choices.append(5)
         for i in range(1, 700): odds_choices.append(8)
         for i in range(1, 600): odds_choices.append(13)
-        for i in range(1, 500): odds_choices.append(21)
-        for i in range(1, 400): odds_choices.append(34)
-        for i in range(1, 300): odds_choices.append(55)
-        for i in range(1, 200): odds_choices.append(89)
+        for i in range(1, 300): odds_choices.append(21)
+        for i in range(1, 200): odds_choices.append(34)
+        for i in range(1, 200): odds_choices.append(55)
+        for i in range(1, 100): odds_choices.append(89)
         for i in range(1, 200): odds_choices.append(144)
-        for i in range(1, 200): odds_choices.append(233)
+        for i in range(1, 100): odds_choices.append(233)
 
         #print odds_choices
         odds_matrix = {}
@@ -116,8 +116,6 @@ class GameSimulator(object):
 
     @staticmethod
     def play(weighted_powers):
-
-
         t = Track()
         t.reset()
         for h in range(1,6):
@@ -155,13 +153,9 @@ class GameSimulator(object):
 
         for i, cur_val in enumerate(values):
             #values[i] = (max_val + 10 - cur_val) / 500
-            values[i] = 1.1 - (cur_val / max_val)
+            values[i] = (1.1 - (cur_val / max_val)) * 5
 
-
-        print (values)
-
-
-
+        #print (values)
         return values
 
 
@@ -176,20 +170,20 @@ if __name__ == "__main__":
     start_time = time.time()
 
     bob = BigBob()
-    bob.credits = 1000
+    bob.credits = 10000
 
     carl = CarefulCarl()
-    carl.credits = 1000
+    carl.credits = 10000
 
     adam = AlloutAdam()
-    adam.credits = 1000
+    adam.credits = 10000
 
     melanie = MiddleMelanie()
-    melanie.credits = 1000
+    melanie.credits = 10000
 
     carl_wins = 0
 
-    for game in range(1, 1000):
+    for game in range(1, 10000):
 
         payouts = GameSimulator.generate_payouts()
         weighted_powers = GameSimulator.get_weighted_powers(payouts)
@@ -201,8 +195,8 @@ if __name__ == "__main__":
 
         winners = GameSimulator.play(weighted_powers)
 
-        if bob.check_win(winners): print(bob.bets)
-        if carl.check_win(winners): carl_wins += 1
+        bob.check_win(winners)
+        carl_wins
         adam.check_win(winners)
         melanie.check_win(winners)
 
@@ -223,7 +217,7 @@ if __name__ == "__main__":
 
     print ("Bobs ending credits: %s" % bob.credits)
     print ("Carls ending credits: %s" % carl.credits)
-    print ("Adam ending credits: %s" % adam.credits)
+    #print ("Adam ending credits: %s" % adam.credits)
     print ("Melanie ending credits: %s" % melanie.credits)
 
     print ("Time = %s" % (time.time() - start_time))
